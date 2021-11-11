@@ -1,0 +1,4 @@
+
+module sortingserviceapi {
+    exports sortingservice;
+}

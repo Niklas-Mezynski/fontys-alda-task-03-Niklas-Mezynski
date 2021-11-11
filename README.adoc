@@ -1,0 +1,219 @@
+ifdef::env-github[]
+:imagesdir: images/
+endif::[]
+:imagesdir: images
+== Introduction to the sorting exercises
+
+To sort items, we need to be able to compare them.
+In Java, we express such a requirement by defining a (functional) interface, that includes the method for comparison called `int compare(T a, T b)`.
+In this exercise we require that any class defining the items to be sorted, will be accompanied by a `Comparator<T>` instance.
+The  sort method can then use this comparator object to do the sorting. You can and even are advised to use lambda expressions or method references.
+See PRC2 for that topic.
+
+To make the student implementation and teachers tests mutually independent, we define an intermediate API, that both will use or implement.
+
+.sorting service class diagram
+image::sorters-cd-2_0.svg[]
+
+.Typical test interaction with queue and sorter.
+[source,java]
+----
+    Queue<TestType> queue = factory.createPreferredQueue( sortKind );
+    queue = fillRandom( queue, 100 );
+    Comparator<TestType> comp = new CountingComparator<>( ( a, b ) -> a.compareTo( b ) );
+    Sorter<String> sorter = factory.createSorter( sortKind,  comp );
+    Queue<String> sortedQueue = sorter.sort( queue );
+    assertThat( sortedQueue ).isSameAs( queue );
+    assertThat( sortedQueue).isOrderedAccoridingTo( comp);
+    // more tests.
+----
+
+.Sorting service makes your implementations available to be tested.
+[source,java]
+----
+public class SortingServices implements SortingServiceFactory {
+
+    Map<SortKind, Supplier<Queue>> queueMap = Map.of(
+            SortKind.SELECTION, () -> new HQueue() // add more when ready
+    );
+
+    Map<SortKind, Function<Comparator, Sorter>> sorterMap = Map.of(
+            SortKind.SELECTION, ( c ) -> new SelectionSorter( c ) // add more when ready
+    );
+
+    @Override
+    public <T> Queue<T> createPreferredQueue( SortKind forSorter ) {
+        return queueMap.get( forSorter ).get();
+    }
+
+    @Override
+    public <T> Sorter<T> createSorter( SortKind kind, Comparator<T> comparator ) {
+        return sorterMap.get( kind ).apply( comparator );
+    }
+
+    /**
+     * Add your sorter kinds here.
+     *
+     * @return the sorters you support.
+     */
+    @Override
+    public SortKind[] supportedSorters() {
+        return new SortKind[]{
+            SortKind.SELECTION // add more when ready
+        };
+    }
+}
+----
+
+In order to sort the objects in a queue, one first chooses a comparator, constructs the Sorter with it and then sorts the
+queue by calling the `Queue sort(Queue q)` method. If you
+ use another comparator, you should create a fresh  sorter object with this comparator, which will then sort the queue with the ordering rules
+imposed by this new comparator. +
+The sorter instance itself is very lightweight, since it only needs to keep a reference to the comparator (in its only field), this imposes no performance penalty.
+
+=== Tasks and Explanation
+
+. The implementing classes of the `Sorter<T>` interface must have a constructor taking a `Comparator<T>` as only argument.
+. The sort method in the sort interface takes a Queue argument, see diagram.
+. A basic sorter object, i.e. an InsertionSorter or a SelectionSorter, should be
+  able to sort all kinds of objects, as long as there is a Comparator object available for those objects.
+  Sorting the objects is possible by using and of course implementing the Java Comparator interface.
+  The Sorter interface must be implemented by the XXXSorter; this interface
+  demands the following method to be implemented: `Queue<E> sort( Queue<E> q )`.
+. The `Sorter` interface, the `Queue` interface as well as the `enum SortKind` defining the sorts of Sorters.footnote:[Pun intended] reside in the api package.
+  See the class diagram above. +
+  How you organise your own implementation is up to you.
+  The only requirement is to allow the teacher test classes to find your implementing classes by providing the name of your SortingServiceFactory implementation in  the module-info.java. If you don't change the name of the provided class asortingservice.SortingServices, it should work out-of-the-box.
+  The SortingServiceFactory is able to create sorter and queue instances dependent
+  on the `SorterKind` enum value that is passed to the factory methods.
+. The constructor of the XXXSorter classes takes the comparator.
+. The `sort` method takes a `Queue` as input, which is to be sorted. This queue is
+  the one that is created in your factory and is up to you. +
+  Make sure your factory produces the correct queue implementation for the SortKind.
+  Of course you are allowed to re use queue implementations where appropriate.
+  However, using a e.g. doubly linked queue where the 2nd link provides no benefit
+  to the sorter is not a good idea, because your queue internal node would carry around
+  and have to initialise and update a useless reference if you do.
+  The teacher tests will have filled that queue using its `put(T e)` method before
+  passing it to the sort method. +
+  The sort method should [red]*NOT* use arrays. The teachers tests will check for that
+  by [red]*forbidding array access* in the Sorter and Queue implementation. +
+  This also implies that [blue]*fields* of some [red]*array types are not allowed*.
+. The sort method sorts the queue and is supposed to return the _same instance_.
+  Try to be frugal, both time (think big-O) and space wise,
+  because that is the objective of this exercise. The less garbage you make the
+  better your implementation will perform in the long run.
+. The teachers tests invoke the sort method with different queue content, and measure the
+  number of compare operations you do, because this is a good estimator for the big-O
+  performance of the sort implementation.
+. You are supposed to work test driven. Maybe start at a queue implementation and
+  then continue with say selection sort using that queue.
+  So write a test, write code and test that code, making the test pass, then rinse and repeat.
+. How you re-arrange the items in the queue or if you use intermediate queues
+  is up to you, as long as you return the _same queue instance_.
+
+[WARNING]
+====
+You are not supposed to use arrays in your Sorter or queue implementations. +
+Our tests will assert for that and will either not be executed or will fail your code if your do. +
+The same goes for abusing a java.util.List.sort or any subclass method to do your sorting.
+====
+
+=== Teacher Non Functional Validity Checks
+
+The teacher tests will test according to the following non functional requirements in Queue and Sorter implementations.
+
+* Use of `java.util.List` or any of its implementing classes is not allowed.
+* Use of the utility class `java.util.Arrays` is not allowed.
+* Array access is not allowed in any of the methods.
+* The methods in the Queue and Sorter implementing classes should be package private or private with the exception of the API methods;
+  the method stipulated by the interfaces should be `public`.
+* The sorter and queue implementations should have the required package private constructors so that the factory can create instances,
+  without exposing the constructor outside the package.
+* The sorter implementation is allowed *one* private final field of type `Comparator<E>`, and as many methods as you like.
+* The `Node`-s  of the queue may be inner classes or outer classes, up to your discretion.
+** If you use inner classes for your Nodes, use `static` inner classes, otherwise each node will
+   have a reference to the outer class which in this case will be a waste of space. Using non-static inner classes
+   will also disallow you to move Nodes from one queue instance to another, which might otherwise be useful in a sorting implementation.
+* The queue implementation may use fields of the `Node` and of primitive types. No other types fields are required nor allowed.
+
+=== Teacher functional and non functional assertions.
+
+* The test count the number of compare invocations by using a specially wrapper comparator instance.
+  These tests will provide such comparator to the Sorter.
+  The count is an indicator of the efficiency of the implementation.
+  We expect c * O(N^2) for selection and insertion sort, where c is some constant like 1/2 or 1/4.
+* The tests should complete in reasonable time. For that we use a JUnit timeout rule set to 2000 milliseconds.
+* As sorted queue is deemed sorted if for all `q.get()` invocations, the value
+  returned is not less than that of the previous `q.get()`. This property is called [blue]*monotonic ascending* order.
+* All tests for all students will be done with the same random data.
+  The *type* of data is to the test's discretion, since the implementations should be generic.
+* The Sorter will be tested with some a-typical queue fillings.
+  Think of empty, one element, two elements, already sorted, all elements equal, reversely sorted, etc.
+* For the 'performance' tests, the tests will use queue sizes of different orders of magnitude.
+
+[TIP]
+====
+From the Non-funtional junit test javadoc:
+
+Inspect that the api-implementing classes/instances provided by the sorting service factory comply with the alda 2021 rules.
+
+* The `Sorter` class should have exactly one final field of type `Comparator<T>`.
+  Rationale: No more are needed and makes the Sorter thread-safe as in reusable by all threads in an application.
+* The `Queue` class is *only* allowed to have fields of the same package or primitive fields.
+  The fields from the same package are expected to be link `Nodes` and are expected to
+  have one or two fields of the `Node` type, the next and optional prev links, and some reference type field (the item or payload).
+  The `Node` instances should NOT have a reference to an outer outer class if there is one. +
+  In short: if it is an inner class it should be a `static` inner class.
+* The number of methods in Sorter and Queue implementations is, other than by the implemented interfaces, unspecified.
+
+====
+
+=== Tasks week 8 and 9, Selection and Insertion sort.
+
+* Implement the sorting services using the *selection* and *insertion* sort approach.
+
+
+=== Tasks week 10 and 11: QuickSort
+
+As a sequel to the basic sorting assignments, we now proceed with the more sophisticated
+sorting routines. The sorting method in this excercise has complexity O(N*log(N).
+You should be aware of this and check that your implementation meets that expectation.
+
+*Tasks*
+
+. Implement the quicksort algorithm using Bentley-McIlroy three-way partitioning,
+ an optimization for the situation in which there are many duplicates.
+. Consider using Medianof-three-partitioning. The underlying data structure has to be a (double) linked queue.
+. Internally you may traverse the queue by using `node.next`  and `node.previous`, but `get(int i)` (element by index), which is what a `java.util.List` provides,
+  should [red]*not* be used [red]*nor* supported.
+
+=== Tasks week 12 and 13: Heap Sort
+
+We finish our sorting project by implementing *HeapSort*.
+The sorting method in this exercise has complexity O(N*log(N). You should be aware of this and check that your implementation meets that expectation.
+
+* Implement the heapsort algorithm, using `TreeNodes` as underlying data structure. This data structure can still behave as a
+ queue with minimal put and get operations.
+* Make sure that you have a Queue implementation that can be used for input and output
+  as per teachers tests and the class diagram above.
+* Some helper methods that might be useful are (exact signature is
+   dependent on your own implementation):
+** `private TNode buildTree(Queue<T> q);`
+** `private TNode heapify();`
+** `private void sink(TNode parent);`
+** `private boolean less(TNode n1, TNode n2);`
+** `private void heapSortStep(TNode lastNode);`
+** `private void removeLastNode();`
+** `private void exchangeItems(TNode n1, TNode n2);`
+
+[TIP]
+====
+To build a tree, it might be useful to use an `itemsQueue` with all Nodes to be added, and
+an empty `availableParentsQueue`. The first itemNode of the itemsQueue is put as first
+availableParent. As long as the itemsQueue is not empty, get the next availableParent,
+assign the next itemNode to the left of the parentNode and put this itemNode as availableParent,
+continue by assigning the next itemNode to the right of the parentNode and
+put this itemNode as availableParent as well.
+====
+

@@ -1,5 +1,6 @@
-package asortingservice;
+package sorterTests;
 
+import asortingservice.SortingServices;
 import org.junit.jupiter.api.Test;
 import sortingservice.Queue;
 import sortingservice.SortKind;

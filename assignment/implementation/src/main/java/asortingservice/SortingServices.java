@@ -1,6 +1,10 @@
 package asortingservice;
 
 import java.util.Comparator;
+import java.util.Map;
+import java.util.function.Function;
+import java.util.function.Supplier;
+
 import sortingservice.Queue;
 import sortingservice.SortKind;
 import sortingservice.Sorter;
@@ -8,15 +12,28 @@ import sortingservice.SortingServiceFactory;
 
 public class SortingServices implements SortingServiceFactory {
 
+    Map<SortKind, Supplier<Queue>> queueMap = Map.of(
+            SortKind.SELECTION, SimpleQueue::new
+    );
+
+    Map<SortKind, Function<Comparator, Sorter>> sorterMap = Map.of(
+            SortKind.SELECTION, SelectionSorter::new
+    );
+
     @Override
-    public Queue createPreferredQueue( SortKind forSorter ) {
-        //TODO
-        throw new UnsupportedOperationException("Not supported yet.");
+    public <T> Queue<T> createPreferredQueue(SortKind forSorter) {
+        return queueMap.get(forSorter).get();
     }
 
     @Override
-    public <T> Sorter<T> createSorter( SortKind kind, Comparator<T> comparator ) {
-        //TODO
-        throw new UnsupportedOperationException("Not supported yet.");
+    public <T> Sorter<T> createSorter(SortKind kind, Comparator<T> comparator) {
+        return sorterMap.get(kind).apply(comparator);
+    }
+
+    @Override
+    public SortKind[] supportedSorters() {
+        return new SortKind[]{
+                SortKind.SELECTION
+        };
     }
 }

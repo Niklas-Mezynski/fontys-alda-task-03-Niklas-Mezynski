@@ -2,9 +2,9 @@ package sorterTests;
 
 import sortingservice.SortKind;
 
-public class SelectionSorterTest extends SorterTestBase{
+public class InsertionSorterTest extends SorterTestBase{
     @Override
     SortKind getSortKind() {
-        return SortKind.SELECTION;
+        return SortKind.INSERTION;
     }
 }

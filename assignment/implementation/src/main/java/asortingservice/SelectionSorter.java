@@ -44,7 +44,6 @@ public class SelectionSorter<T> implements Sorter<T> {
             current = current.next;
             q.put(smallestElement);
         }
-
         return q;
     }
 

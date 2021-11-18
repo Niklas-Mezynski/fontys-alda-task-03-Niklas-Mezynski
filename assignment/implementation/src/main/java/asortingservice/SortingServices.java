@@ -13,11 +13,13 @@ import sortingservice.SortingServiceFactory;
 public class SortingServices implements SortingServiceFactory {
 
     Map<SortKind, Supplier<Queue>> queueMap = Map.of(
-            SortKind.SELECTION, SimpleQueue::new
+            SortKind.SELECTION, SimpleQueue::new,
+            SortKind.INSERTION, DoubleLinkedQueue::new
     );
 
     Map<SortKind, Function<Comparator, Sorter>> sorterMap = Map.of(
-            SortKind.SELECTION, SelectionSorter::new
+            SortKind.SELECTION, SelectionSorter::new,
+            SortKind.INSERTION, InsertionSorter::new
     );
 
     @Override
@@ -33,7 +35,8 @@ public class SortingServices implements SortingServiceFactory {
     @Override
     public SortKind[] supportedSorters() {
         return new SortKind[]{
-                SortKind.SELECTION
+                SortKind.SELECTION,
+                SortKind.INSERTION
         };
     }
 }

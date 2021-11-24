@@ -14,12 +14,14 @@ public class SortingServices implements SortingServiceFactory {
 
     Map<SortKind, Supplier<Queue>> queueMap = Map.of(
             SortKind.SELECTION, SimpleQueue::new,
-            SortKind.INSERTION, DoubleLinkedQueue::new
+            SortKind.INSERTION, DoubleLinkedQueue::new,
+            SortKind.QUICK, DoubleLinkedQueue::new
     );
 
     Map<SortKind, Function<Comparator, Sorter>> sorterMap = Map.of(
             SortKind.SELECTION, SelectionSorter::new,
-            SortKind.INSERTION, InsertionSorter::new
+            SortKind.INSERTION, InsertionSorter::new,
+            SortKind.QUICK, QuickSorter::new
     );
 
     @Override
@@ -36,7 +38,8 @@ public class SortingServices implements SortingServiceFactory {
     public SortKind[] supportedSorters() {
         return new SortKind[]{
                 SortKind.SELECTION,
-                SortKind.INSERTION
+                SortKind.INSERTION,
+                SortKind.QUICK
         };
     }
 }

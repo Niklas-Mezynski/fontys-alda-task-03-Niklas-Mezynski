@@ -21,7 +21,7 @@ public abstract class SorterTestBase {
     void t01SimpleSortingTest() {
         //Creating and randomly filling the queue
         Queue<Integer> queue = factory.createPreferredQueue( getSortKind() );
-        fillRandom( queue, 100 );
+        fillRandom( queue, 1000 );
         //Creating the sorter
         Comparator<Integer> comp = Comparator.naturalOrder();
         Sorter<Integer> sorter = factory.createSorter( getSortKind(),  comp );
@@ -57,6 +57,11 @@ public abstract class SorterTestBase {
         queue.put(3);
         queue.put(7);
         queue.put(12);
+        queue.put(13);
+        queue.put(13);
+        queue.put(13);
+        queue.put(15);
+        queue.put(20);
         //Creating the sorter
         Comparator<Integer> comp = Comparator.naturalOrder();
         Sorter<Integer> sorter = factory.createSorter( getSortKind(),  comp );
@@ -66,11 +71,11 @@ public abstract class SorterTestBase {
         Collections.sort(sortedListForComparison);
         //Sorting the queue and checking if its in right order
         assertThatCode(() -> sorter.sort( queue )).doesNotThrowAnyException();
-        assertThat(queue).containsExactlyElementsOf(List.of(1,2,3,7,12));
+        assertThat(queue).containsExactlyElementsOf(List.of(1,2,3,7,12,13,13,13,15,20));
     }
 
     private void fillRandom(Queue<Integer> queue, int i) {
-        Random random = new Random(69);
+        Random random = new Random();
         for (int j = 0; j < i; j++) {
             queue.put(random.nextInt(i));
         }

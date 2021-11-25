@@ -19,8 +19,6 @@ public class InsertionSorter<T> implements Sorter<T> {
             throw new UnsupportedOperationException("Queue type not supported");
         DoubleLinkedQueue<T> queue = (DoubleLinkedQueue<T>) q;
 
-
-
         DoubleLinkedQueue.Node<T> current = queue.head.next;
         for (int i = 1; i < queue.size(); i++) {
             DoubleLinkedQueue.Node<T> cursor = current.next;

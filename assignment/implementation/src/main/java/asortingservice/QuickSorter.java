@@ -23,9 +23,6 @@ public class QuickSorter<T> implements Sorter<T> {
 //        DoubleLinkedQueue<T> queue = (DoubleLinkedQueue<T>) q;
         queue = (DoubleLinkedQueue<T>) q;
         quicksort(queue.head.next, queue.tail.prev);
-        StringBuilder sb = new StringBuilder();
-        queue.forEach(element -> sb.append(element).append(","));
-        System.out.println(sb);
         return queue;
     }
 
@@ -49,10 +46,12 @@ public class QuickSorter<T> implements Sorter<T> {
         while (true) {
             l = l.next;
             while (less(l, pivot)) {
+                if (l.next.element==null) break;
                 l = l.next;
             }
             r = r.prev;
             while (less(pivot, r)) {
+                if (r.prev.element==null) break;
                 r = r.prev;
             }
             if (touch(l, r)) {

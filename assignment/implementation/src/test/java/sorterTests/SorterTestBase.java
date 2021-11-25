@@ -21,7 +21,7 @@ public abstract class SorterTestBase {
     void t01SimpleSortingTest() {
         //Creating and randomly filling the queue
         Queue<Integer> queue = factory.createPreferredQueue( getSortKind() );
-        fillRandom( queue, 1000 );
+        fillRandom( queue, 10000 );
         //Creating the sorter
         Comparator<Integer> comp = Comparator.naturalOrder();
         Sorter<Integer> sorter = factory.createSorter( getSortKind(),  comp );

@@ -65,13 +65,26 @@ public abstract class SorterTestBase {
         //Creating the sorter
         Comparator<Integer> comp = Comparator.naturalOrder();
         Sorter<Integer> sorter = factory.createSorter( getSortKind(),  comp );
-        //Creating an ArrayList and sort it in order to compare later on
-        List<Integer> sortedListForComparison = new ArrayList<>();
-        queue.forEach(sortedListForComparison::add);
-        Collections.sort(sortedListForComparison);
         //Sorting the queue and checking if its in right order
         assertThatCode(() -> sorter.sort( queue )).doesNotThrowAnyException();
         assertThat(queue).containsExactlyElementsOf(List.of(1,2,3,7,12,13,13,13,15,20));
+    }
+
+    @Test
+    void t04AllElementsTheSame() {
+        //Creating the queue
+        Queue<Integer> queue = factory.createPreferredQueue( getSortKind() );
+        List<Integer> sortedListForComparison = new ArrayList<>();
+        for (int i = 0; i < 50; i++) {
+            queue.put(3);
+            sortedListForComparison.add(3);
+        }
+        //Creating the sorter
+        Comparator<Integer> comp = Comparator.naturalOrder();
+        Sorter<Integer> sorter = factory.createSorter( getSortKind(),  comp );
+        //Sorting the queue and checking if its in right order
+        assertThatCode(() -> sorter.sort( queue )).doesNotThrowAnyException();
+        assertThat(queue).containsExactlyElementsOf(sortedListForComparison);
     }
 
     private void fillRandom(Queue<Integer> queue, int i) {

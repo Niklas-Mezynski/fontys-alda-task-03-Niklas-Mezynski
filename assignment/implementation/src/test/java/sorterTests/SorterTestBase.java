@@ -50,24 +50,22 @@ public abstract class SorterTestBase {
 
     @Test
     void t03PreSortedQueue() {
-        //Creating the queue
+        //Creating an ArrayList and sort it in order to compare later on
+        List<Integer> sortedListForComparison = new ArrayList<>();
+        Random random = new Random();
+        for (int i = 0; i < 100; i++) {
+            sortedListForComparison.add(random.nextInt(100));
+        }
+        Collections.sort(sortedListForComparison);
+        //Creating the queue and filling it with the pre sorted elements
         Queue<Integer> queue = factory.createPreferredQueue( getSortKind() );
-        queue.put(1);
-        queue.put(2);
-        queue.put(3);
-        queue.put(7);
-        queue.put(12);
-        queue.put(13);
-        queue.put(13);
-        queue.put(13);
-        queue.put(15);
-        queue.put(20);
+        sortedListForComparison.forEach(queue::put);
         //Creating the sorter
         Comparator<Integer> comp = Comparator.naturalOrder();
         Sorter<Integer> sorter = factory.createSorter( getSortKind(),  comp );
         //Sorting the queue and checking if its in right order
         assertThatCode(() -> sorter.sort( queue )).doesNotThrowAnyException();
-        assertThat(queue).containsExactlyElementsOf(List.of(1,2,3,7,12,13,13,13,15,20));
+        assertThat(queue).containsExactlyElementsOf(sortedListForComparison);
     }
 
     @Test

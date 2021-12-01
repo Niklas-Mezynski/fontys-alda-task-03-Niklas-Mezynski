@@ -19,32 +19,32 @@ public class SelectionSorter<T> implements Sorter<T> {
 
     @Override
     public Queue<T> sort(Queue<T> q) {
-//        StreamSupport.stream(q.spliterator(), false).forEach(System.out::println);
-        if (q.isEmpty())
-            return q;
+        if (!(q instanceof SimpleQueue))
+            throw new UnsupportedOperationException("Wrong queue type");
 
-        SimpleQueue<T> temp = new SimpleQueue<>();
-        while (!q.isEmpty()) {
-            temp.put(q.get());
-        }
+        SimpleQueue<T> queue = (SimpleQueue<T>) q;
 
-        Node<T> current = temp.first;
-        for (int i = 0; i < temp.size(); i++) {
+        //"Current" is the cursor for the first unsorted element in the queue
+        Node<T> current = queue.first;
+        //Outer loop iterating through the whole queue once
+        while (current != null) {
             Node<T> smallest = current;
             Node<T> cursor = current.next;
-            for (int j = i+1; j < temp.size(); j++) {
+            //Inner loop for searching the smallest element in the remaining unsorted queue
+            while (cursor != null) {
                 if (comp.compare(cursor.element, smallest.element) < 0) {
                     smallest = cursor;
                 }
                 cursor = cursor.next;
             }
+            //Exchanging the first unsorted element with the smallest from the queue
             T smallestElement = smallest.element;
             smallest.element = current.element;
             current.element = smallestElement;
+            //Going to the next iteration
             current = current.next;
-            q.put(smallestElement);
         }
-        return q;
+        return queue;
     }
 
 }

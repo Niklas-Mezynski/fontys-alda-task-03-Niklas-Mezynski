@@ -4,7 +4,6 @@ import sortingservice.Queue;
 import sortingservice.Sorter;
 
 import java.util.Comparator;
-import java.util.Stack;
 
 public class HeapSorter<T> implements Sorter<T> {
 
@@ -19,8 +18,8 @@ public class HeapSorter<T> implements Sorter<T> {
         if (q.isEmpty())
             return q;
 
-        Stack<TNode<T>> parentStack = new Stack<>();
-        Stack<TNode<T>> lastNodeStack = new Stack<>();
+        SimpleStack<TNode<T>> parentStack = new SimpleStack<>();
+        SimpleStack<TNode<T>> lastNodeStack = new SimpleStack<>();
         //Build a tree
         TNode<T> root = buildTree(q, parentStack, lastNodeStack);
         //Heapify the tree
@@ -42,7 +41,7 @@ public class HeapSorter<T> implements Sorter<T> {
         return q;
     }
 
-    private TNode<T> buildTree(Queue<T> q, Stack<TNode<T>> parentStack, Stack<TNode<T>> lastNodeStack) {
+    private TNode<T> buildTree(Queue<T> q, SimpleStack<TNode<T>> parentStack, SimpleStack<TNode<T>> lastNodeStack) {
         if (q.isEmpty()) {
             return new TNode<>(null);
         }
@@ -70,7 +69,7 @@ public class HeapSorter<T> implements Sorter<T> {
         return root;
     }
 
-    private void heapify(Stack<TNode<T>> parentStack) {
+    private void heapify(SimpleStack<TNode<T>> parentStack) {
         while (!parentStack.isEmpty()) {
             sink(parentStack.pop());
         }

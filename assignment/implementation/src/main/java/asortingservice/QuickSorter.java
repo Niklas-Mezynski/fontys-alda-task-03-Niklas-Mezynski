@@ -17,13 +17,29 @@ public class QuickSorter<T> implements Sorter<T> {
 
     @Override
     public Queue<T> sort(Queue<T> q) {
+        if (!(q instanceof DoubleLinkedQueue)) {
+            throw new UnsupportedOperationException("Wrong queue type");
+        }
+        DoubleLinkedQueue<T> queue = (DoubleLinkedQueue<T>) q;
+        quicksort(queue);
+        return queue;
+    }
+
+    public DoubleLinkedQueue<T> quicksort(DoubleLinkedQueue<T> q) {
         if (q.size() <= 1) {
             return q;
         }
+        //Finding the middle pivot from 3 queue elements
+        Node<T> pivotNode = q.head;
+        lessExch(q.tail.prev, q.head.next);
+        lessExch(q.tail.prev, q.head.next.next);
+        lessExch(q.head.next, q.head.next.next);
+        T pivot = q.get();
+
+        //intermediate queues for the elements smaller/equal/larger as the pivot
         DoubleLinkedQueue<T> less = new DoubleLinkedQueue<>();
         DoubleLinkedQueue<T> equal = new DoubleLinkedQueue<>();
         DoubleLinkedQueue<T> larger = new DoubleLinkedQueue<>();
-        T pivot = q.get();
         equal.put(pivot);
         while (!q.isEmpty()) {
             T element = q.get();
@@ -49,5 +65,14 @@ public class QuickSorter<T> implements Sorter<T> {
         }
 
         return q;
+    }
+
+    //If a's element is smaller than b's -> swap the elemtns
+    private void lessExch(Node<T> a, Node<T> b) {
+        if (comp.compare(a.element, b.element) < 0) {
+            T temp = a.element;
+            a.element = b.element;
+            b.element = temp;
+        }
     }
 }

@@ -17,90 +17,37 @@ public class QuickSorter<T> implements Sorter<T> {
 
     @Override
     public Queue<T> sort(Queue<T> q) {
-        if (!(q instanceof DoubleLinkedQueue)) {
-            throw new UnsupportedOperationException("Wrong queue type for QuickSort - needs to be a doubly linked list");
+        if (q.size() <= 1) {
+            return q;
         }
-//        DoubleLinkedQueue<T> queue = (DoubleLinkedQueue<T>) q;
-        queue = (DoubleLinkedQueue<T>) q;
-        quicksort(queue.head.next, queue.tail.prev);
-        return queue;
-    }
-
-    private void quicksort(Node<T> left, Node<T> right) {
-        if (touch(left, right)) {
-            return;
-        }
-        exchange(getMiddle(left, right), left.next);
-        compExch(left, right);
-        compExch(left.next, right);
-        compExch(left.next, left);
-        Node<T> pivotNode = partition(left, right);
-        quicksort(left, pivotNode.prev);
-        quicksort(pivotNode.next, right);
-    }
-
-    private Node<T> partition(Node<T> left, Node<T> right) {
-        Node<T> pivot = left;
-        Node<T> l = left;
-        Node<T> r = right.next;
-        while (true) {
-            l = l.next;
-            while (less(l, pivot)) {
-                if (l.next.element==null) break;
-                l = l.next;
-            }
-            r = r.prev;
-            while (less(pivot, r)) {
-                if (r.prev.element==null) break;
-                r = r.prev;
-            }
-            if (touch(l, r)) {
-                break;
-            }
-            exchange(l, r);
-        }
-        Node<T> leftOne = getLeft(l, r);
-        exchange(leftOne, pivot);
-        return leftOne;
-    }
-
-    private Node<T> getLeft(Node<T> l, Node<T> r) {
-        if (l.prev == r || l == r) {
-            return r;
-        }
-        return l;
-    }
-
-    private void compExch(Node<T> left, Node<T> right) {
-        if (less(right, left)) {
-            exchange(left, right);
-        }
-    }
-
-    private boolean less(Node<T> a, Node<T> b) {
-        return comp.compare(a.element, b.element) < 0;
-    }
-
-    private Node<T> getMiddle(Node<T> l, Node<T> r) {
-        if (l.prev == r || l == r) {
-            return r;
-        }
-        while (l.element != null) {
-            l = l.next;
-            if (l == r) {
-                break;
+        DoubleLinkedQueue<T> less = new DoubleLinkedQueue<>();
+        DoubleLinkedQueue<T> equal = new DoubleLinkedQueue<>();
+        DoubleLinkedQueue<T> larger = new DoubleLinkedQueue<>();
+        T pivot = q.get();
+        equal.put(pivot);
+        while (!q.isEmpty()) {
+            T element = q.get();
+            if (comp.compare(element, pivot) < 0) {
+                less.put(element);
+            } else if (comp.compare(element, pivot) == 0) {
+                equal.put(element);
+            } else {
+                larger.put(element);
             }
         }
-        return l;
-    }
+        sort(less);
+        sort(larger);
 
-    private boolean touch(Node<T> l, Node<T> r) {
-        return l == r || l.prev == r;
-    }
+        while (!less.isEmpty()) {
+            q.put(less.get());
+        }
+        while (!equal.isEmpty()) {
+            q.put(equal.get());
+        }
+        while (!larger.isEmpty()) {
+            q.put(larger.get());
+        }
 
-    private void exchange(Node<T> a, Node<T> b) {
-        T temp = a.element;
-        a.element = b.element;
-        b.element = temp;
+        return q;
     }
 }

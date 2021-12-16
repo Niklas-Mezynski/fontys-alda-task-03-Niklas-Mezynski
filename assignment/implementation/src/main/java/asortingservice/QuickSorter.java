@@ -30,7 +30,6 @@ public class QuickSorter<T> implements Sorter<T> {
             return q;
         }
         //Finding the middle pivot from 3 queue elements
-        Node<T> pivotNode = q.head;
         lessExch(q.tail.prev, q.head.next);
         lessExch(q.tail.prev, q.head.next.next);
         lessExch(q.head.next, q.head.next.next);
